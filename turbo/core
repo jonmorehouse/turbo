@@ -1,0 +1,37 @@
+module "core_cluster" {
+  source = "../cluster"
+
+  infra = "${var.name}"
+  name = "core"
+
+  regions = "${keys(var.region_zones)}"
+  region_zones = "${var.region_zones}"
+  zone_subnetwork_cidr_blocks = "${var.zone_subnetwork_cidr_blocks}"
+
+  udp_port_configuration = "${var.core_udp_port_configuration}"
+  tcp_port_configuration = "${var.core_tcp_port_configuration}"
+}
+
+module "core_instance_template" {
+  source = "../instance_template"
+
+  infra = "${var.name}"
+  cluster = "core"
+
+  zones = "${module.core_cluster.zones}"
+  zone_subnetworks = "${module.core_cluster.subnetwork_names}"
+
+  disk_image = "${var.disk_image}"
+}
+
+module "core_dynamic_instance_group" {
+  source = "../dynamic_instance_group"
+
+  infra = "${var.name}"
+  cluster = "core"
+
+  max_per_zone = 2
+  min_per_zone = 1
+  zones = "${module.core_cluster.zones}"
+  instance_templates = "${module.core_instance_template.self_links}"
+}

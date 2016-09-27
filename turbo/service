@@ -1,0 +1,37 @@
+module "service_cluster" {
+  source = "../cluster"
+
+  infra = "${var.name}"
+  name = "service"
+
+  regions = "${keys(var.region_zones)}"
+  region_zones = "${var.region_zones}"
+  zone_subnetwork_cidr_blocks = "${var.zone_subnetwork_cidr_blocks}"
+
+  udp_port_configuration = "${var.service_udp_port_configuration}"
+  tcp_port_configuration = "${var.service_tcp_port_configuration}"
+}
+
+module "service_instance_template" {
+  source = "../instance_template"
+
+  infra = "${var.name}"
+  cluster = "service"
+
+  zones = "${module.service_cluster.zones}"
+  zone_subnetworks = "${module.service_cluster.subnetwork_names}"
+
+  disk_image = "${var.disk_image}"
+}
+
+module "service_dynamic_instance_group" {
+  source = "../dynamic_instance_group"
+
+  infra = "${var.name}"
+  cluster = "service"
+
+  max_per_zone = 2
+  min_per_zone = 1
+  zones = "${module.service_cluster.zones}"
+  instance_templates = "${module.service_instance_template.self_links}"
+}

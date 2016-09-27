@@ -1,0 +1,36 @@
+module "bastion_cluster" {
+  source = "../cluster"
+
+  infra = "${var.name}"
+  name = "bastion"
+
+  regions = "${keys(var.region_zones)}"
+  region_zones = "${var.region_zones}"
+  zone_subnetwork_cidr_blocks = "${var.zone_subnetwork_cidr_blocks}"
+
+  tcp_port_configuration = "${var.bastion_tcp_port_configuration}"
+  udp_port_configuration = "${var.bastion_udp_port_configuration}"
+}
+
+module "bastion_instance_template" {
+  source = "../instance_template"
+
+  infra = "${var.name}"
+  cluster = "bastion"
+
+  zones = "${module.bastion_cluster.zones}"
+  zone_subnetworks = "${module.bastion_cluster.subnetwork_names}"
+
+  disk_image = "${var.disk_image}"
+}
+
+module "bastion_static_instance_group" {
+  source = "../static_instance_group"
+
+  infra = "${var.name}"
+  cluster = "bastion"
+
+  instances_per_zone = 1
+  instance_templates = "${module.bastion_instance_template.self_links}"
+  zones = "${module.bastion_cluster.zones}"
+}
