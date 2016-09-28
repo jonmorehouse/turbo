@@ -13,10 +13,10 @@ resource "google_compute_instance" "default" {
 
   tags = "${list(
             "parent-${var.parent_id}",
-            "zone-${element(var.zones, count.index % length(var.zones))}",
-            "address-${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 1)}"
+            "zone-${element(var.zones, count.index % length(var.zones))}"
           )}"
 
+  //"address-${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 1)}"
   disk {
     image       = "${var.disk_image}"
     auto_delete = true
@@ -29,7 +29,7 @@ resource "google_compute_instance" "default" {
     subnetwork = "${var.parent_id}-${element(var.zones, count.index)}"
 
     // the ip address inside of the subnetwork is deterministic and corresponds to its offset in the cidr block.
-    address = "${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 1)}"
+    address = "${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 2)}"
 
     access_config {
       // NOTE: by _not_ specifying a nat_ip, this block is granted a dynamic,
@@ -88,7 +88,8 @@ resource "google_compute_target_pool" "primary" {
 // each primary zone target pool corresponds to a set of forwarding rules which
 // forward to the configured ports/port-ranges over tcp
 resource "google_compute_forwarding_rule" "zone-tcp" {
-  count = "${length(var.zones) * length(var.tcp_forwarding_rules)}"
+  /*count = "${length(var.zones) * length(var.tcp_forwarding_rules)}"*/
+  count = 0
 
   name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${element(var.tcp_forwarding_rules, count.index % length(var.tcp_forwarding_rules))}"
   target = "${element(google_compute_target_pool.primary.*.self_link, count.index % length(var.zones))}"
@@ -101,7 +102,8 @@ resource "google_compute_forwarding_rule" "zone-tcp" {
 // each primary zone target pool corresponds to a set of forwarding rules which
 // forward to the configured ports/port-ranges over udp
 resource "google_compute_forwarding_rule" "zone-udp" {
-  count = "${length(var.zones) * length(var.udp_forwarding_rules)}"
+  /*count = "${length(var.zones) * length(var.udp_forwarding_rules)}"*/
+  count = 0
 
   name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${element(var.udp_forwarding_rules, count.index % length(var.udp_forwarding_rules))}"
   target = "${element(google_compute_target_pool.primary.*.self_link, count.index % length(var.zones))}"
@@ -116,7 +118,7 @@ resource "google_compute_forwarding_rule" "zone-udp" {
 resource "google_compute_target_pool" "region" {
   name = "${var.parent_id}-${var.region}"
 
-  instances = ["${list(google_compute_instance.default.*.self_link)}"]
+  instances = ["${google_compute_instance.default.*.self_link}"]
 
   region = "${var.region}"
 }
@@ -124,7 +126,8 @@ resource "google_compute_target_pool" "region" {
 // a set of region based forwarding rules are created which forward traffic to
 // the configured ports/port-ranges over tcp
 resource "google_compute_forwarding_rule" "region-tcp" {
-  count = "${length(var.tcp_forwarding_rules)}"
+  /*count = "${length(var.tcp_forwarding_rules)}"*/
+  count = 0
   name = "${var.parent_id}-${var.region}-tcp-${element(var.tcp_forwarding_rules, count.index)}"
   region = "${var.region}"
   target = "${google_compute_target_pool.region.self_link}"
@@ -136,7 +139,8 @@ resource "google_compute_forwarding_rule" "region-tcp" {
 // a set of region based forwarding rules are created which forward traffic to
 // the configured ports/port-ranges over udp
 resource "google_compute_forwarding_rule" "region-udp" {
-  count = "${length(var.udp_forwarding_rules)}"
+  /*count = "${length(var.udp_forwarding_rules)}"*/
+  count = 0
   name = "${var.parent_id}-${var.region}-udp-${element(var.udp_forwarding_rules, count.index)}"
   region = "${var.region}"
   target = "${google_compute_target_pool.region.self_link}"

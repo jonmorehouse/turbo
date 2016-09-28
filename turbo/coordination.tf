@@ -45,6 +45,7 @@ module "coordination_region-us-west1" {
 
   // internal to force dependency
   _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
+  _zone_links_dep = "${module.coordination_cluster.subnetwork_links}"
 }
 
 module "coordination_region-us-central1" {
@@ -74,4 +75,5 @@ module "coordination_region-us-central1" {
 
   // internal to force dependency
   _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
+  _zone_links_dep = "${module.coordination_cluster.subnetwork_links}"
 }

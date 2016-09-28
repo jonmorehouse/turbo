@@ -75,6 +75,10 @@ variable "_zone_names_dep" {
   type = "list"
 }
 
+variable "_zone_links_dep" {
+  type = "list"
+}
+
 variable "_int_to_sequence" {
   description = "A map of comma delimited integers in a series. This is a hack,
       to make the api to this module nicer until terraform supports the ability to

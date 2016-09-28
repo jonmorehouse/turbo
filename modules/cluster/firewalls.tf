@@ -3,7 +3,7 @@
 resource "google_compute_firewall" "tcp_cluster" {
   count = "${length(keys(var.tcp_cluster_firewall))}"
 
-  name    = "${var.infra}-${var.name}-${element(keys(var.tcp_cluster_firewall), count.index)}-tcp"
+  name    = "${var.infra}-${var.name}-tcp-cluster-${element(keys(var.tcp_cluster_firewall), count.index)}"
   network = "${google_compute_network.default.name}"
 
   allow {
@@ -20,7 +20,7 @@ resource "google_compute_firewall" "tcp_cluster" {
 resource "google_compute_firewall" "udp_cluster" {
   count = "${length(keys(var.udp_cluster_firewall))}"
 
-  name    = "${var.infra}-${var.name}-${element(keys(var.udp_cluster_firewall), count.index)}-udp"
+  name    = "${var.infra}-${var.name}-udp-cluster-${element(keys(var.udp_cluster_firewall), count.index)}"
   network = "${google_compute_network.default.name}"
 
   allow {
@@ -37,7 +37,7 @@ resource "google_compute_firewall" "udp_cluster" {
 resource "google_compute_firewall" "tcp_range" {
   count = "${length(keys(var.tcp_range_firewall))}"
 
-  name    = "${var.infra}-${var.name}-${element(keys(var.tcp_range_firewall), count.index)}-tcp"
+  name    = "${var.infra}-${var.name}-tcp-range-${count.index}"
   network = "${google_compute_network.default.name}"
 
   allow {
@@ -45,8 +45,7 @@ resource "google_compute_firewall" "tcp_range" {
     ports    = "${compact(split(",", lookup(var.tcp_range_firewall, element(keys(var.tcp_range_firewall), count.index))))}"
   }
 
-  source_ranges = "${list(lookup(var.tcp_range_firewall, element(keys(var.tcp_range_firewall), count.index)))}"
-  target_tags  = "${list("${var.infra}-${var.name}")}"
+  source_ranges = "${split(",", element(keys(var.tcp_range_firewall), count.index))}"
 }
 
 // create a firewall allowing traffic from the origin source ranges over udp to
@@ -54,14 +53,14 @@ resource "google_compute_firewall" "tcp_range" {
 resource "google_compute_firewall" "udp_range" {
   count = "${length(keys(var.udp_range_firewall))}"
 
-  name    = "${var.infra}-${var.name}-${element(keys(var.udp_range_firewall), count.index)}-udp"
+  name    = "${var.infra}-${var.name}-udp-range-${count.index}"
   network = "${google_compute_network.default.name}"
 
   allow {
     protocol = "udp"
-    ports    = "${compact(split(",", lookup(var.udp_range_firewall, element(keys(var.udp_range_firewall), count.index))))}"
+    ports    = "${compact(split(",", lookup(var.udp_range_firewall, element(keys(var.tcp_range_firewall), count.index))))}"
   }
 
-  source_ranges = "${list(lookup(var.udp_range_firewall, element(keys(var.udp_range_firewall), count.index)))}"
-  target_tags  = "${list("${var.infra}-${var.name}")}"
+  source_ranges = "${split(",", element(keys(var.udp_range_firewall), count.index))}"
 }
+
