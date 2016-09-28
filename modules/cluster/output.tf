@@ -3,11 +3,11 @@ output "regions" {
   value = "${list("hi")}"
 }
 
-output "zone_names" {
+output "subnetwork_names" {
   value = "${list(google_compute_subnetwork.default.*.name)}"
 }
 
-output "zone_links" {
+output "subnetwork_links" {
   value = "${list(google_compute_subnetwork.default.*.self_link)}"
 }
 

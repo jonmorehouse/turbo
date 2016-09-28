@@ -29,6 +29,22 @@ module "coordination_region-us-west1" {
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
 
   startup_script = "${var.coordination_startup_script}"
+  machine_type = "${var.coordination_machine_type}"
+  disk_image = "${var.coordination_disk_image}"
+
+  // forwarding rules correspond to all of the unique port/port-ranges in the
+  // firewall configurations
+  tcp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_tcp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_tcp_range_firewall)))
+                          )))}"
+  udp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_udp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_udp_range_firewall)))
+                          )))}"
+
+  // internal to force dependency
+  _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
 }
 
 module "coordination_region-us-central1" {
@@ -44,4 +60,18 @@ module "coordination_region-us-central1" {
   startup_script = "${var.coordination_startup_script}"
   machine_type = "${var.coordination_machine_type}"
   disk_image = "${var.coordination_disk_image}"
+
+  // forwarding rules correspond to all of the unique port/port-ranges in the
+  // firewall configurations
+  tcp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_tcp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_tcp_range_firewall)))
+                          )))}"
+  udp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_udp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_udp_range_firewall)))
+                          )))}"
+
+  // internal to force dependency
+  _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
 }

@@ -84,3 +84,63 @@ resource "google_compute_target_pool" "primary" {
   backup_pool = "${element(google_compute_target_pool.backup.*.self_link, count.index)}"
   failover_ratio = "${var.failover_ratio}"
 }
+
+// each primary zone target pool corresponds to a set of forwarding rules which
+// forward to the configured ports/port-ranges over tcp
+resource "google_compute_forwarding_rule" "zone-tcp" {
+  count = "${length(var.zones) * length(var.tcp_forwarding_rules)}"
+
+  name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${element(var.tcp_forwarding_rules, count.index % length(var.tcp_forwarding_rules))}"
+  target = "${element(google_compute_target_pool.primary.*.self_link, count.index % length(var.zones))}"
+  region = "${var.region}"
+
+  ip_protocol = "tcp"
+  port_range = "${element(var.tcp_forwarding_rules, count.index % length(var.tcp_forwarding_rules))}"
+}
+
+// each primary zone target pool corresponds to a set of forwarding rules which
+// forward to the configured ports/port-ranges over udp
+resource "google_compute_forwarding_rule" "zone-udp" {
+  count = "${length(var.zones) * length(var.udp_forwarding_rules)}"
+
+  name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${element(var.udp_forwarding_rules, count.index % length(var.udp_forwarding_rules))}"
+  target = "${element(google_compute_target_pool.primary.*.self_link, count.index % length(var.zones))}"
+  region = "${var.region}"
+
+  ip_protocol = "udp"
+  port_range = "${element(var.udp_forwarding_rules, count.index % length(var.udp_forwarding_rules))}"
+}
+
+// create a single target pool which contains each of the instances in the
+// entire region.
+resource "google_compute_target_pool" "region" {
+  name = "${var.parent_id}-${var.region}"
+
+  instances = ["${list(google_compute_instance.default.*.self_link)}"]
+
+  region = "${var.region}"
+}
+
+// a set of region based forwarding rules are created which forward traffic to
+// the configured ports/port-ranges over tcp
+resource "google_compute_forwarding_rule" "region-tcp" {
+  count = "${length(var.tcp_forwarding_rules)}"
+  name = "${var.parent_id}-${var.region}-tcp-${element(var.tcp_forwarding_rules, count.index)}"
+  region = "${var.region}"
+  target = "${google_compute_target_pool.region.self_link}"
+
+  ip_protocol = "tcp"
+  port_range = "${element(var.tcp_forwarding_rules, count.index % length(var.tcp_forwarding_rules))}"
+}
+
+// a set of region based forwarding rules are created which forward traffic to
+// the configured ports/port-ranges over udp
+resource "google_compute_forwarding_rule" "region-udp" {
+  count = "${length(var.udp_forwarding_rules)}"
+  name = "${var.parent_id}-${var.region}-udp-${element(var.udp_forwarding_rules, count.index)}"
+  region = "${var.region}"
+  target = "${google_compute_target_pool.region.self_link}"
+
+  ip_protocol = "udp"
+  port_range = "${element(var.udp_forwarding_rules, count.index % length(var.udp_forwarding_rules))}"
+}

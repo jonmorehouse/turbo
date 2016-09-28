@@ -55,6 +55,26 @@ variable "startup_script" {
   script and is run at startup for each host."
 }
 
+// forwarding rules
+variable "tcp_forwarding_rules" {
+  description = "List of port/port-ranges which zone/region TCP forwarding rules
+  should be created of."
+
+  type = "list"
+}
+
+variable "udp_forwarding_rules" {
+  description = "List of port/port-ranges which zone/region UDP forwarding
+  rules should be created of."
+
+  type = "list"
+}
+
+// internal variables
+variable "_zone_names_dep" {
+  type = "list"
+}
+
 variable "_int_to_sequence" {
   description = "A map of comma delimited integers in a series. This is a hack,
       to make the api to this module nicer until terraform supports the ability to
