@@ -11,20 +11,25 @@ resource "google_compute_instance" "default" {
   zone           = "${element(var.zones, count.index % length(var.zones))}"
   can_ip_forward = true
 
-  tags = "${list("parent-${var.parent_id}", "zone-${element(var.zones, count.index % length(var.zones))}")}"
+  tags = "${list(
+            "parent-${var.parent_id}",
+            "zone-${element(var.zones, count.index % length(var.zones))}",
+            "address-${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 1)}"
+          )}"
 
   disk {
     image       = "${var.disk_image}"
     auto_delete = true
   }
 
+  metadata_startup_script = "${var.startup_script}"
+
   network_interface {
     // network is created by the cluster module, and is formatted via name: parent_id-zone
     subnetwork = "${var.parent_id}-${element(var.zones, count.index)}"
 
     // the ip address inside of the subnetwork is deterministic and corresponds to its offset in the cidr block.
-
-    //address = "${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone)}"
+    address = "${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 1)}"
 
     access_config {
       // NOTE: by _not_ specifying a nat_ip, this block is granted a dynamic,

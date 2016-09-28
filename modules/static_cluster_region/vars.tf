@@ -51,10 +51,8 @@ variable "disk_image" {
 }
 
 variable "startup_script" {
-  description = "path of the startup script that should be written as the
-      startup-script."
-
-  default = "/dev/null"
+  description = "Startup script path. This is set as the metadata startup
+  script and is run at startup for each host."
 }
 
 variable "_int_to_sequence" {
