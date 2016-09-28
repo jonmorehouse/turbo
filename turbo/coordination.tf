@@ -15,9 +15,9 @@ module "coordination_cluster" {
 
   udp_range_firewall = "${var.coordination_udp_range_firewall}"
   tcp_range_firewall = "${var.coordination_tcp_range_firewall}"
+
 }
 
-// coordination static region is responsible for accepting a list of instances, and outputting a target pool to it ...
 module "coordination_region-us-west1" {
   source    = "../modules/static_cluster_region"
   parent_id = "${module.coordination_cluster.id}"
@@ -27,6 +27,8 @@ module "coordination_region-us-west1" {
   failover_zones = "${var.coordination_failover_zones}"
   instances_per_zone  = "${var.coordination_instances_per_zone}"
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
+
+  startup_script = "${var.coordination_startup_script}"
 }
 
 module "coordination_region-us-central1" {
@@ -38,4 +40,8 @@ module "coordination_region-us-central1" {
   failover_zones = "${var.coordination_failover_zones}"
   instances_per_zone  = "${var.coordination_instances_per_zone}"
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
+
+  startup_script = "${var.coordination_startup_script}"
+  machine_type = "${var.coordination_machine_type}"
+  disk_image = "${var.coordination_disk_image}"
 }

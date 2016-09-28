@@ -86,3 +86,13 @@ variable "coordination_bootstrap_script" {
   such as bootstrapping a cluster. This is run on a single arbitrary host per
   region."
 }
+
+// instance variable attributes
+variable "coordination_machine_type" {
+  type    = "string"
+  default = "f1-micro"
+}
+
+variable "coordination_disk_image" {
+  default = "coreos-cloud/coreos-stable"
+}
