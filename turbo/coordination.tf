@@ -1,26 +1,34 @@
-module "coordination_cluster" {
-  source = "../modules/cluster"
+/*module "coordination_cluster" {*/
+  /*source = "../modules/cluster"*/
 
-  infra = "${var.name}"
-  name  = "coordination"
+  /*infra = "${var.name}"*/
+  /*name  = "coordination"*/
 
-  // a map of region => zone,zone is passed in, we take the accumulation of all
-  // these to determine the zones the cluster exists in
-  zones = "${split(",", join(",", values(var.coordination_zones)))}"
+  /*// a map of region => zone,zone is passed in, we take the accumulation of all*/
+  /*// these to determine the zones the cluster exists in*/
+  /*zones = "${split(",", join(",", values(var.coordination_zones)))}"*/
 
-  cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
+  /*cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"*/
 
-  udp_cluster_firewall = "${var.coordination_udp_cluster_firewall}"
-  tcp_cluster_firewall = "${var.coordination_tcp_cluster_firewall}"
+  /*udp_cluster_firewall = "${var.coordination_udp_cluster_firewall}"*/
+  /*tcp_cluster_firewall = "${var.coordination_tcp_cluster_firewall}"*/
 
-  udp_range_firewall = "${var.coordination_udp_range_firewall}"
-  tcp_range_firewall = "${var.coordination_tcp_range_firewall}"
+  /*udp_range_firewall = "${var.coordination_udp_range_firewall}"*/
+  /*tcp_range_firewall = "${var.coordination_tcp_range_firewall}"*/
 
+/*}*/
+
+// parent network that wraps subnetworks in each specified region
+resource "google_compute_network" "default" {
+  name                    = "${var.name}-coordination"
+  description             = "network"
+  auto_create_subnetworks = "false"
 }
 
 module "coordination_region-us-west1" {
   source    = "../modules/static_cluster_region"
-  parent_id = "${module.coordination_cluster.id}"
+  parent_id = "${var.name}-coordination"
+  network_link = "${google_compute_network.default.self_link}"
 
   region              = "us-west1"
   zones               = "${split(",", lookup(var.coordination_zones, "us-west1"))}"
@@ -42,15 +50,12 @@ module "coordination_region-us-west1" {
                             split(",", join(",", values(var.coordination_udp_cluster_firewall))),
                             split(",", join(",", values(var.coordination_udp_range_firewall)))
                           )))}"
-
-  // internal to force dependency
-  _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
-  _zone_links_dep = "${module.coordination_cluster.subnetwork_links}"
 }
 
 module "coordination_region-us-central1" {
   source    = "../modules/static_cluster_region"
-  parent_id = "${module.coordination_cluster.id}"
+  parent_id = "${var.name}-coordination"
+  network_link = "${google_compute_network.default.self_link}"
 
   region              = "us-central1"
   zones               = "${split(",", lookup(var.coordination_zones, "us-central1", ""))}"
@@ -72,8 +77,4 @@ module "coordination_region-us-central1" {
                             split(",", join(",", values(var.coordination_udp_cluster_firewall))),
                             split(",", join(",", values(var.coordination_udp_range_firewall)))
                           )))}"
-
-  // internal to force dependency
-  _zone_names_dep = "${module.coordination_cluster.subnetwork_names}"
-  _zone_links_dep = "${module.coordination_cluster.subnetwork_links}"
 }

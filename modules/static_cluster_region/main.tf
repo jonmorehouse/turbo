@@ -5,7 +5,7 @@ resource "google_compute_instance" "default" {
   count = "${length(compact(var.zones)) * var.instances_per_zone}"
 
   // infra-name-zone-offset
-  name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${count.index % var.instances_per_zone}"
+  name = "${var.parent_id}-${element(var.zones, count.index % length(var.zones))}-${count.index}"
 
   machine_type   = "${var.machine_type}"
   zone           = "${element(var.zones, count.index % length(var.zones))}"
@@ -26,7 +26,8 @@ resource "google_compute_instance" "default" {
 
   network_interface {
     // network is created by the cluster module, and is formatted via name: parent_id-zone
-    subnetwork = "${var.parent_id}-${element(var.zones, count.index)}"
+    subnetwork = "${element(google_compute_subnetwork.default.*.name, count.index % length(var.zones))}"
+
 
     // the ip address inside of the subnetwork is deterministic and corresponds to its offset in the cidr block.
     address = "${cidrhost(lookup(var.cidr_blocks_by_zone, element(var.zones, count.index % length(var.zones))), count.index % var.instances_per_zone + 2)}"

@@ -71,14 +71,6 @@ variable "udp_forwarding_rules" {
 }
 
 // internal variables
-variable "_zone_names_dep" {
-  type = "list"
-}
-
-variable "_zone_links_dep" {
-  type = "list"
-}
-
 variable "_int_to_sequence" {
   description = "A map of comma delimited integers in a series. This is a hack,
       to make the api to this module nicer until terraform supports the ability to
@@ -96,5 +88,30 @@ variable "_int_to_sequence" {
     "8"  = "0,1,2,3,4,5,6,7"
     "9"  = "0,1,2,3,4,5,6,7,8"
     "10" = "0,1,2,3,4,5,6,7,8,9"
+  }
+}
+
+// internal variables
+variable "_zones_to_region" {
+  default = {
+    "us-west1-a" = "us-west1"
+    "us-west1-b" = "us-west1"
+
+    "us-central1-a" = "us-central1"
+    "us-central1-b" = "us-central1"
+    "us-central1-c" = "us-central1"
+    "us-central1-f" = "us-central1"
+
+    "us-east1-b" = "us-east1"
+    "us-east1-c" = "us-east1"
+    "us-east1-d" = "us-east1"
+
+    "europe-west1-b" = "europe-west1"
+    "europe-west1-c" = "europe-west1"
+    "europe-west1-d" = "europe-west1"
+
+    "asia-east1-a" = "asia-east1"
+    "asia-east1-b" = "asia-east1"
+    "asia-east1-c" = "asia-east1"
   }
 }
