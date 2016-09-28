@@ -10,11 +10,11 @@ module "coordination_cluster" {
 
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
 
-  udp_cluster_firewall_configuration = "${var.coordination_udp_port_configuration}"
-  tcp_cluster_firewall_configuration = "${var.coordination_tcp_port_configuration}"
+  udp_cluster_firewall = "${var.coordination_udp_cluster_firewall}"
+  tcp_cluster_firewall = "${var.coordination_tcp_cluster_firewall}"
 
-  udp_range_firewall_configuration = "${var.coordination_udp_range_firewall_configuration}"
-  tcp_range_firewall_configuration = "${var.coordination_tcp_range_firewall_configuration}"
+  udp_range_firewall = "${var.coordination_udp_range_firewall}"
+  tcp_range_firewall = "${var.coordination_tcp_range_firewall}"
 }
 
 // coordination static region is responsible for accepting a list of instances, and outputting a target pool to it ...
@@ -38,13 +38,4 @@ module "coordination_region-us-central1" {
   failover_zones = "${var.coordination_failover_zones}"
   instances_per_zone  = "${var.coordination_instances_per_zone}"
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
-}
-
-output "debug" {
-  value = "debug"
-}
-
-// coordination internal addresses is the
-output "coordination_internal_addresses" {
-  value = "TBD"
 }
