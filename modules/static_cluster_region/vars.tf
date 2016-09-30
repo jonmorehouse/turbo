@@ -2,30 +2,17 @@ variable "parent_id" {
   description = "parent cluster's id"
 }
 
-variable "region" {}
+variable "network" {
+  description = "parent cluster network self_link"
+}
 
+variable "region" {
+  description = "region to build resources in"
+}
+
+// zone variables
 variable "zones" {
   type = "list"
-}
-
-variable "failover_zones" {
-  type = "map"
-}
-
-variable "failover_ratio" {
-  description = "ratio of failed instances before failing over to the backup pool"
-  default = 0.8
-}
-
-variable "instances_per_zone" {
-  default = "1"
-}
-
-variable "backup_target_pools_by_zone" {
-  description = "map of which zones failover to which other zones. If a zone is
-  not specified it does not failover"
-  type = "map"
-  default = {}
 }
 
 variable "cidr_blocks_by_zone" {
@@ -33,7 +20,15 @@ variable "cidr_blocks_by_zone" {
   type        = "map"
 }
 
+variable "failover_zones" {
+  type = "map"
+}
+
 // instance configuration
+variable "instances_per_zone" {
+  default = "1"
+}
+
 variable "machine_type" {
   description = "Machine type of the instance to use"
 
@@ -55,7 +50,12 @@ variable "startup_script" {
   script and is run at startup for each host."
 }
 
-// forwarding rules
+// routing vars
+variable "failover_ratio" {
+  description = "ratio of failed instances before failing over to the backup pool"
+  default = 0.8
+}
+
 variable "tcp_forwarding_rules" {
   description = "List of port/port-ranges which zone/region TCP forwarding rules
   should be created of."
@@ -68,6 +68,32 @@ variable "udp_forwarding_rules" {
   rules should be created of."
 
   type = "list"
+}
+
+// firewall variables
+variable "cluster_tags" {
+  description = "map of cluster name -> instance tags in the cluster"
+  type = "map"
+}
+
+variable "tcp_cluster_firewall" {
+  description = "map of ports to open over tcp to other ports"
+  type        = "map"
+}
+
+variable "udp_cluster_firewall" {
+  description = "map of ports to open over udp to other ports"
+  type        = "map"
+}
+
+variable "udp_range_firewall" {
+  description = "map of cidr ranges to ports that should be open for them"
+  default     = {}
+}
+
+variable "tcp_range_firewall" {
+  description = "map of cidr ranges to ports that should be open for them"
+  default     = {}
 }
 
 // internal variables

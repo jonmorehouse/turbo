@@ -12,25 +12,25 @@ variable "zone_subnetwork_cidr_blocks" {
   type        = "map"
 
   default = {
-    "us-west1-a" = "10.0.0.0/16"
-    "us-west1-b" = "10.1.0.0/16"
+    "us-west1-a" = "10.0.1.0/24"
+    "us-west1-b" = "10.0.2.0/24"
 
-    "us-central1-a" = "10.2.0.0/16"
-    "us-central1-b" = "10.3.0.0/16"
-    "us-central1-c" = "10.4.0.0/16"
-    "us-central1-f" = "10.5.0.0/16"
+    "us-central1-a" = "10.0.3.0/24"
+    "us-central1-b" = "10.0.4.0/24"
+    "us-central1-c" = "10.0.5.0/24"
+    "us-central1-f" = "10.0.6.0/24"
 
-    "us-east1-b" = "10.6.0.0/16"
-    "us-east1-c" = "10.7.0.0/16"
-    "us-east1-d" = "10.8.0.0/16"
+    "us-east1-b" = "10.0.7.0/24"
+    "us-east1-c" = "10.0.8.0/24"
+    "us-east1-d" = "10.0.9.0/24"
 
-    "europe-west1-b" = "10.9.0.0/16"
-    "europe-west1-c" = "10.10.0.0/16"
-    "europe-west1-d" = "10.11.0.0/16"
+    "europe-west1-b" = "10.0.10.0/24"
+    "europe-west1-c" = "10.0.11.0/24"
+    "europe-west1-d" = "10.0.12.0/24"
 
-    "asia-east1-a" = "10.12.0.0/16"
-    "asia-east1-b" = "10.13.0.0/16"
-    "asia-east1-c" = "10.14.0.0/16"
+    "asia-east1-a" = "10.0.13.0/24"
+    "asia-east1-b" = "10.0.14.0/24"
+    "asia-east1-c" = "10.0.15.0/24"
   }
 }
 
