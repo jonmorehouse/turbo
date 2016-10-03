@@ -1,50 +1,96 @@
-module "coordination_cluster" {
-  source = "../modules/cluster"
-
-  infra = "${var.name}"
-  name  = "coordination"
-
-  // a map of region => zone,zone is passed in, we take the accumulation of all
-  // these to determine the zones the cluster exists in
-  zones = "${split(",", join(",", values(var.coordination_zones)))}"
-
-  cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
-
-  udp_cluster_firewall_configuration = "${var.coordination_udp_port_configuration}"
-  tcp_cluster_firewall_configuration = "${var.coordination_tcp_port_configuration}"
-
-  udp_range_firewall_configuration = "${var.coordination_udp_range_firewall_configuration}"
-  tcp_range_firewall_configuration = "${var.coordination_tcp_range_firewall_configuration}"
+// parent network that wraps subnetworks in each specified region
+resource "google_compute_network" "default" {
+  name                    = "${var.name}-coordination"
+  description             = "network"
+  auto_create_subnetworks = "false"
 }
 
-// coordination static region is responsible for accepting a list of instances, and outputting a target pool to it ...
 module "coordination_region-us-west1" {
   source    = "../modules/static_cluster_region"
-  parent_id = "${module.coordination_cluster.id}"
+
+  parent_id = "${var.name}-coordination"
+  network = "${google_compute_network.default.self_link}"
 
   region              = "us-west1"
+
+  // zone configuration
   zones               = "${split(",", lookup(var.coordination_zones, "us-west1"))}"
   failover_zones = "${var.coordination_failover_zones}"
-  instances_per_zone  = "${var.coordination_instances_per_zone}"
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
+
+  // instance configuration
+  instances_per_zone  = "${var.coordination_instances_per_zone}"
+  startup_script = "${var.coordination_startup_script}"
+  machine_type = "${var.coordination_machine_type}"
+  disk_image = "${var.coordination_disk_image}"
+
+  // firewall configuration
+  udp_cluster_firewall = "${var.coordination_udp_cluster_firewall}"
+  tcp_cluster_firewall = "${var.coordination_tcp_cluster_firewall}"
+
+  udp_range_firewall = "${var.coordination_udp_range_firewall}"
+  tcp_range_firewall = "${var.coordination_tcp_range_firewall}"
+
+  cluster_tags = {
+    "core" = "${var.name}-core"
+    "public" = "${var.name}-public"
+    "service" = "${var.name}-service"
+  }
+
+  // routing configuration
+  // forwarding rules correspond to all of the unique port/port-ranges in the
+  // firewall configurations
+  tcp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_tcp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_tcp_range_firewall)))
+                          )))}"
+  udp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_udp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_udp_range_firewall)))
+                          )))}"
 }
 
 module "coordination_region-us-central1" {
   source    = "../modules/static_cluster_region"
-  parent_id = "${module.coordination_cluster.id}"
+
+  parent_id = "${var.name}-coordination"
+  network = "${google_compute_network.default.self_link}"
 
   region              = "us-central1"
-  zones               = "${split(",", lookup(var.coordination_zones, "us-central1", ""))}"
+
+  // zone configuration
+  zones               = "${split(",", lookup(var.coordination_zones, "us-central1"))}"
   failover_zones = "${var.coordination_failover_zones}"
-  instances_per_zone  = "${var.coordination_instances_per_zone}"
   cidr_blocks_by_zone = "${var.coordination_cidr_blocks_by_zone}"
-}
 
-output "debug" {
-  value = "debug"
-}
+  // instance configuration
+  instances_per_zone  = "${var.coordination_instances_per_zone}"
+  startup_script = "${var.coordination_startup_script}"
+  machine_type = "${var.coordination_machine_type}"
+  disk_image = "${var.coordination_disk_image}"
 
-// coordination internal addresses is the
-output "coordination_internal_addresses" {
-  value = "TBD"
+  // firewall configuration
+  udp_cluster_firewall = "${var.coordination_udp_cluster_firewall}"
+  tcp_cluster_firewall = "${var.coordination_tcp_cluster_firewall}"
+
+  udp_range_firewall = "${var.coordination_udp_range_firewall}"
+  tcp_range_firewall = "${var.coordination_tcp_range_firewall}"
+
+  cluster_tags = {
+    "core" = "${var.name}-core"
+    "public" = "${var.name}-public"
+    "service" = "${var.name}-service"
+  }
+
+  // routing configuration
+  // forwarding rules correspond to all of the unique port/port-ranges in the
+  // firewall configurations
+  tcp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_tcp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_tcp_range_firewall)))
+                          )))}"
+  udp_forwarding_rules = "${distinct(compact(concat(
+                            split(",", join(",", values(var.coordination_udp_cluster_firewall))),
+                            split(",", join(",", values(var.coordination_udp_range_firewall)))
+                          )))}"
 }

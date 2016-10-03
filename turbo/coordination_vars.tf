@@ -57,40 +57,42 @@ variable "coordination_cidr_blocks_by_zone" {
   }
 }
 
-// coordination cluster ports to open over udp by source cluster
-variable "coordination_udp_port_configuration" {
-  description = "UDP port/port-ranges to open, by cluster, to the coordination cluster."
-
-  default = {
-    core    = "8600"
-    service = "8600"
-    public  = "8600"
-    bastion = "8600"
-  }
-}
-
-// coordination cluster ports to open over tcp by source cluster
-variable "coordination_tcp_port_configuration" {
-  description = "TCP port/port-ranges to open, by cluster, to the coordination cluster."
-
-  default = {
-    core    = "8500,8301,8302,8300"
-    service = "8500,8301,8302,8300"
-    public  = "8500,8301,8302,8300"
-    bastion = "22"
-  }
-}
-
-// coordination cluster ports to open over udp by source cidr block range
-variable "coordination_udp_range_firewall_configuration" {
-  description = "UDP port/port-ranges to open, by cidr block source range, to the coordination cluster."
-
+// firewall configurations
+variable "coordination_tcp_cluster_firewall" {
   default = {}
 }
 
-// coordination cluster ports to open over tcp by source cidr block range
-variable "coordination_tcp_range_firewall_configuration" {
-  description = "TCP port/port-ranges to open, by cidr block source range, to the coordination cluster."
-
+variable "coordination_udp_cluster_firewall" {
   default = {}
+}
+
+variable "coordination_tcp_range_firewall" {
+  default = {}
+}
+
+variable "coordination_udp_range_firewall" {
+  default = {}
+}
+
+// provisioner configurations / startup scripts
+variable "coordination_startup_script" {
+  description = "Startup script path. This script is set as the metadata
+  startup script on each new instance configured."
+}
+
+variable "coordination_bootstrap_script" {
+  description = "Bootstrap script path. Bootstrap scripts are run after a
+  region's instances have been bootstrapped and is responsible for doing things
+  such as bootstrapping a cluster. This is run on a single arbitrary host per
+  region."
+}
+
+// instance variable attributes
+variable "coordination_machine_type" {
+  type    = "string"
+  default = "f1-micro"
+}
+
+variable "coordination_disk_image" {
+  default = "coreos-cloud/coreos-stable"
 }

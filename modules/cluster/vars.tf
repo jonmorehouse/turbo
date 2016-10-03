@@ -16,25 +16,6 @@ variable "cidr_blocks_by_zone" {
   type        = "map"
 }
 
-variable "tcp_cluster_firewall_configuration" {
-  description = "map of ports to open over tcp to other ports"
-  type        = "map"
-}
-
-variable "udp_cluster_firewall_configuration" {
-  description = "map of ports to open over udp to other ports"
-  type        = "map"
-}
-
-variable "udp_range_firewall_configuration" {
-  description = "map of cidr ranges to ports that should be open for them"
-  default     = {}
-}
-
-variable "tcp_range_firewall_configuration" {
-  description = "map of cidr ranges to ports that should be open for them"
-  default     = {}
-}
 
 // internal variables
 variable "_zones_to_region" {
